@@ -42,11 +42,11 @@ Le fichier `docker-compose.yaml` crée les conteneurs suivants :
 
 | Nom | Rôle | Port SSH | Image utilisée |
 |-----|------|----------|----------------|
-| `ansible` | Conteneur de contrôle Ansible | 2222 | `ftutorials/ubuntu-ansible` |
-| `client1` | Conteneur cible Ubuntu | 2223 | `ftutorials/ubuntu-ssh` |
-| `client2` | Conteneur cible Ubuntu | 2224 | `ftutorials/ubuntu-ssh` |
-| `client3` | Conteneur cible Rocky Linux | 2225 | `ftutorials/rocky-ssh` |
-| `client3` | Conteneur cible Rocky Linux | 2226 | `ftutorials/rocky-ssh` |
+| `ansible` | Conteneur de contrôle Ansible | 2222 | [`ftutorials/ubuntu-ansible`](https://hub.docker.com/r/ftutorials/ubuntu-ansible/tags) |
+| `client1` | Conteneur cible Ubuntu | 2223 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
+| `client2` | Conteneur cible Ubuntu | 2224 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
+| `client3` | Conteneur cible Rocky Linux | 2225 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
+| `client3` | Conteneur cible Rocky Linux | 2226 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
 
 ---
 
