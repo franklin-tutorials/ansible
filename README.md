@@ -46,13 +46,13 @@ Le fichier `docker-compose.yaml` crée les conteneurs suivants :
 | `client1` | Conteneur cible Ubuntu | 2223 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
 | `client2` | Conteneur cible Ubuntu | 2224 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
 | `client3` | Conteneur cible Rocky Linux | 2225 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
-| `client3` | Conteneur cible Rocky Linux | 2226 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
+| `client4` | Conteneur cible Rocky Linux | 2226 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
 
 ---
 
 ## 🚀 Comment utiliser le LAB
 
-### 1. Cloner le projet
+### 1. Télécharger ou cloner le projet
 
 ```bash
 git clone https://github.com/franklin-tutorials/ansible.git
@@ -85,15 +85,16 @@ ssh root@localhost -p 2222  # ansible
 ssh root@localhost -p 2223  # client1
 ssh root@localhost -p 2224  # client2
 ssh root@localhost -p 2225  # client3
+ssh root@localhost -p 2226  # client4
 ```
 🔑 Mot de passe : P@ssw0rd
 
 ⚠️ **IMPORTANT** :  
 **LES IMAGES DOCKER DE CE LAB SONT RÉSERVÉES À DES FINS DE TEST ET D’APPRENTISSAGE UNIQUEMENT !**    ➡️ **NE PAS LES UTILISER DANS UN  ENVIRONNEMENT DE PRODUCTION.**
 
-Le dossier config en local est partagé dans le conteneur ansible à l’emplacement : /root/config.
+Le dossier `config` est partagé dans le conteneur ansible à l’emplacement : `/root/config`.
 
-C’est dans ce dossier en local que tu écriras ton inventaire, tes playbooks, tes rôles etc ... Et conservera tes fichiers sur ton PC en cas de suppression de ton conteneur ansible.
+C’est dans ce dossier en local sur ta machine que tu écriras ton inventaire, tes playbooks, tes rôles etc ... afin de conserver tes fichiers en cas de suppression de ton conteneur ansible.
 
 ### 5. Arrêter les conteneurs depuis ton terminal
 
