@@ -112,8 +112,8 @@ docker-compose down
 
 ## 📚 Pour aller plus loin
 
-- [Documentation Ansible](https://www.docker.com/)
-- [Documentation Docker](https://docs.ansible.com/)
+- [Documentation Docker](https://www.docker.com/)
+- [Documentation Ansible](https://docs.ansible.com/)
 
 
 ---
