@@ -1,0 +1,48 @@
+---
+
+services:
+  ansible:
+    image: ftutorials/ubuntu-ssh:1.0
+    container_name: ansible
+    ports:
+      - "2222:22"
+    volumes:
+      - ./config:/root/config
+    networks:
+      - ansible_net
+
+  client1:
+    image: ftutorials/ubuntu-ssh:1.0
+    container_name: client1
+    ports:
+      - "2223:22"
+    networks:
+      - ansible_net
+
+  client2:
+    image: ftutorials/ubuntu-ssh:1.0
+    container_name: client2
+    ports:
+      - "2224:22"
+    networks:
+      - ansible_net
+
+  client3:
+    image: ftutorials/rocky-ssh:1.0
+    container_name: client3
+    ports:
+      - "2225:22"
+    networks:
+      - ansible_net
+
+  client4:
+    image: ftutorials/rocky-ssh:1.0
+    container_name: client4
+    ports:
+      - "2226:22"
+    networks:
+      - ansible_net
+
+networks:
+  ansible_net:
+    driver: bridge
