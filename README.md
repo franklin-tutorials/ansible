@@ -21,7 +21,7 @@ Docker Compose est un outil qui permet de :
 - **définir plusieurs conteneurs dans un seul fichier (`docker-compose.yaml`)**
 - **les lancer tous en une seule commande**
 
-🎯 C’est parfait pour notre lab : un conteneur de contrôle de node Ansible + plusieurs conteneurs des nodes clients.
+🎯 C’est parfait pour notre lab : un conteneur pour le controleur Ansible + plusieurs conteneurs clients.
 
 ---
 
