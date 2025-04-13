@@ -47,6 +47,7 @@ Le fichier `docker-compose.yaml` crée les conteneurs suivants :
 | `client2` | Conteneur cible Ubuntu | 2224 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
 | `client3` | Conteneur cible Rocky Linux | 2225 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
 | `client4` | Conteneur cible Rocky Linux | 2226 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
+| `quiz-ansible` | Quiz | XXXX | [`ftutorials/quiz:ansible-1`](https://hub.docker.com/r/ftutorials/quiz/tags) |
 
 ---
 
