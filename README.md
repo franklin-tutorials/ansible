@@ -70,13 +70,13 @@ cd ansible
 ```
 
 ```bash
-docker-compose up -d  
+docker compose up -d  
 ```
 
 ### 3. Lister et voir l'état des conteneurs depuis ton terminal
 
 ```bash
-docker-compose ps 
+docker compose ps 
 ```
 
 ### 4. Tester la connexion SSH depuis ton terminal
@@ -100,13 +100,13 @@ C’est dans ce dossier en local sur ta machine que tu écriras ton inventaire, 
 ### 5. Arrêter les conteneurs depuis ton terminal
 
 ```bash
-docker-compose stop 
+docker compose stop 
 ```
 
 ### 6. Arrêter et supprimer les conteneurs depuis ton terminal
 
 ```bash
-docker-compose down 
+docker compose down 
 ```
 
 
