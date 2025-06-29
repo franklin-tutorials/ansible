@@ -109,6 +109,20 @@ docker compose stop
 docker compose down 
 ```
 
+### BONUS. Utilisation de Makefile
+
+`Makefile` est un fichier texte utilisé par la commande `make` pour automatiser des tâches répétitives.
+
+Les commandes disponibles :
+
+```bash
+	make start     # Lancer environnement de travail
+	make stop      # Arreter environnement de travail
+	make restart   # Redemarrer environnement de travail
+	make logs      # Voir les logs environnement de travail
+	make list      # Voir les conteneurs actifs environnement de travail
+```
+⚠️ L'outil `GNU make` doit être installé sur votre machine.
 
 ---
 
