@@ -116,11 +116,11 @@ docker compose down
 Les commandes disponibles :
 
 ```bash
-	make start     # Lancer environnement de travail
-	make stop      # Arreter environnement de travail
-	make restart   # Redemarrer environnement de travail
-	make logs      # Voir les logs environnement de travail
-	make list      # Voir les conteneurs actifs environnement de travail
+make start     # Lancerenvironnement de travail
+make stop      # Arreterenvironnement de travail
+make restart   # Redemarrerenvironnement de travail
+make logs      # Voir les logsenvironnement de travail
+make list      # Voir les conteneursactifs environnement de travail
 ```
 ⚠️ L'outil `GNU make` doit être installé sur votre machine.
 
