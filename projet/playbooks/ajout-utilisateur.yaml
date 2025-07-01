@@ -1,0 +1,13 @@
+- name: Manage user accounts
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Create user 'pierre'
+      ansible.builtin.user:
+        name: pierre
+        comment: "User account for Pierre"
+        shell: /bin/bash
+        home: /home/pierre
+        state: present
+        create_home: yes

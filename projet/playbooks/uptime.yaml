@@ -1,0 +1,12 @@
+- name: Get and display uptime of ubuntu hosts
+  hosts: ubuntu
+  gather_facts: no
+
+  tasks:
+    - name: Get uptime from remote hosts
+      ansible.builtin.command: uptime
+      register: uptime_result
+
+    - name: Display the uptime
+      ansible.builtin.debug:
+        var: uptime_result.stdout

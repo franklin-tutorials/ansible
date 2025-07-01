@@ -1,0 +1,7 @@
+- name: Discover and Use Ansible Facts
+  hosts: client1
+
+  tasks:
+    - name: Display a summary using facts
+      ansible.builtin.debug:
+        msg: "The host {{ ansible_facts.hostname }} is running {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }} and has {{ ansible_facts.memtotal_mb }}MB of RAM."

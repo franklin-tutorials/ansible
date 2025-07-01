@@ -1,0 +1,8 @@
+- name: Execute a remote shell script idempotently
+  hosts: client1
+
+  tasks:
+    - name: Run script1.sh
+      ansible.builtin.shell:
+        cmd: /root/script1.sh
+        creates: /root/test1

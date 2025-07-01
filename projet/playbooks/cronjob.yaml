@@ -1,0 +1,26 @@
+- name: Schedule a cron job
+  hosts: client1
+  become: yes
+
+  tasks:
+    - name: Ensure cron package is installed (for Ubuntu)
+      ansible.builtin.apt:
+        name: cron
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure cronie package is installed (for Rocky)
+      ansible.builtin.dnf:
+        name: cronie
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Create a cron job to run script1.sh
+      ansible.builtin.cron:
+        name: "Run test script every Monday"
+        weekday: "1"
+        hour: "15"
+        minute: "10"
+        job: "/root/script1.sh"
+        user: root

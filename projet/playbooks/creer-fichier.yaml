@@ -1,0 +1,13 @@
+- name: Create a file with a dynamic name
+  hosts: all
+  become: yes
+
+  vars:
+    nom_fichier: toto
+
+  tasks:
+    - name: "Create an empty log file named {{ nom_fichier }}.log"
+      ansible.builtin.file:
+        path: "/tmp/{{ nom_fichier }}.log"
+        state: touch
+        mode: '0644'

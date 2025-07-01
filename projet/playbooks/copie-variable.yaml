@@ -1,0 +1,19 @@
+- name: Copy a file to remote clients using variables
+  hosts: all
+  become: yes
+
+  vars:
+    source_file: /root/projet/sdv.conf
+    dest_path: /tmp/sdv.conf.bak
+    file_owner: root
+    file_group: root
+    file_mode: '0644'
+
+  tasks:
+    - name: Copy file using variables
+      ansible.builtin.copy:
+        src: "{{ source_file }}"
+        dest: "{{ dest_path }}"
+        owner: "{{ file_owner }}"
+        group: "{{ file_group }}"
+        mode: "{{ file_mode }}"

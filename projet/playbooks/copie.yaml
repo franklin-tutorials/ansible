@@ -1,0 +1,8 @@
+- name: Copy a file to remote clients
+  hosts: all
+
+  tasks:
+    - name: Copy sdv.conf to /tmp on remote hosts
+      ansible.builtin.copy:
+        src: /root/projet/sdv.conf
+        dest: /tmp/sdv.conf

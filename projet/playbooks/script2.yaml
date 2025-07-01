@@ -1,0 +1,8 @@
+- name: Transfer and execute a script
+  hosts: all
+
+  tasks:
+    - name: Run script2.sh on remote hosts
+      ansible.builtin.script:
+        cmd: /root/projet/script2.sh
+        creates: /root/test2

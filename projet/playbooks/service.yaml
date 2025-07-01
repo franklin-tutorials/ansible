@@ -1,0 +1,9 @@
+- name: Manage apache2 service
+  hosts: ubuntu
+  become: yes
+
+  tasks:
+    - name: "Ensure apache2 service is in the '{{ service_state }}' state"
+      ansible.builtin.service:
+        name: apache2
+        state: "{{ service_state }}"

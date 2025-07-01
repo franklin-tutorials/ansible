@@ -1,0 +1,9 @@
+- name: Set a password for a user
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Set password for user 'pierre'
+      ansible.builtin.user:
+        name: pierre
+        password: "{{ newpass | password_hash('sha512') }}"

@@ -1,0 +1,8 @@
+- name: Modify file permissions
+  hosts: ubuntu
+
+  tasks:
+    - name: Add write permission for all users to /root/vinci
+      ansible.builtin.file:
+        path: /root/vinci
+        mode: '0666' # u=rw, g=rw, o=rw
