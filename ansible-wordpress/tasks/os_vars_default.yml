@@ -1,0 +1,41 @@
+---
+# tasks/os_vars_default.yml - Fallback for unsupported OS families
+
+- name: Display warning for unsupported OS family
+  ansible.builtin.debug:
+    msg: >
+      Warning: The OS family '{{ ansible_os_family }}' is not explicitly supported by this role.
+      Attempting to use generic defaults, but functionality is not guaranteed.
+      Currently, this role is primarily tested for Debian and RedHat families.
+  tags: always
+
+- name: Set generic/fallback variables
+  ansible.builtin.set_fact:
+    apache_user: "apache"  # Common default
+    apache_group: "apache" # Common default
+    apache_package_name: "httpd" # Common default
+    php_package_names: ["php", "php-mysql"] # Common default
+    mariadb_server_package_name: "mariadb-server" # Common default
+    mariadb_client_package_name: "mariadb-client" # Common default
+    apache_service_name: "httpd" # Common default
+    apache_conf_dir: "/etc/httpd"
+    apache_sites_available_dir: "/etc/httpd/conf.d"
+    apache_sites_enabled_dir: "/etc/httpd/conf.d"
+    apache_wordpress_conf_filename: "wordpress.conf"
+    apache_wordpress_conf_path: "{{ apache_sites_enabled_dir }}/{{ apache_wordpress_conf_filename }}"
+    apache_log_dir: "/var/log/httpd"
+    php_conf_paths: ["/etc/php.ini"]
+    mysql_python_interpreter: "/usr/bin/python3"
+    apache_default_index_file: "/var/www/html/index.html" # Generic guess
+  tags: always
+
+- name: Ensure Python MySQL client is attempted for unsupported OS
+  ansible.builtin.package:
+    name: "{{ python_mysql_dependency | default('python3-PyMySQL') }}" # Guessing PyMySQL
+    state: present
+  become: yes
+  tags:
+    - packages
+    - database
+    - wordpress_install
+  ignore_errors: true # Ignore if this fails as it's a best guess effort

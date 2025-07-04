@@ -1,0 +1,47 @@
+---
+# vars file for ansible-wordpress role
+# These variables override those in defaults/main.yml
+# Example:
+# wp_db_name: "my_custom_wordpress_db"
+
+# OS-specific variables will be set here based on ansible_os_family
+# This allows tasks to use generic variable names like 'apache_package_name'
+# which will then be defined based on the detected OS.
+
+# This file can also be used to store sensitive variables if not using Ansible Vault,
+# though it's generally recommended to pass sensitive data via command-line --extra-vars
+# or use Ansible Vault.
+
+# For user/group, we'll set them based on OS family
+# These are just illustrative; the actual setting happens in a task.
+# _apache_user: "{{ 'www-data' if ansible_os_family == 'Debian' else 'apache' }}"
+# _apache_group: "{{ 'www-data' if ansible_os_family == 'Debian' else 'apache' }}"
+
+# Similarly for package names if not handled directly in tasks with conditionals
+# _apache_package_name: "{{ apache_package_name_debian if ansible_os_family == 'Debian' else apache_package_name_redhat }}"
+# _php_package_names: "{{ php_package_names_debian if ansible_os_family == 'Debian' else php_package_names_redhat }}"
+# _mariadb_server_package_name: "{{ mariadb_server_package_name_debian if ansible_os_family == 'Debian' else mariadb_server_package_name_redhat }}"
+# _mariadb_client_package_name: "{{ mariadb_client_package_name_debian if ansible_os_family == 'Debian' else mariadb_client_package_name_redhat }}"
+# _apache_service_name: "{{ apache_service_name_debian if ansible_os_family == 'Debian' else apache_service_name_redhat }}"
+
+# These specific variables will be defined in a task using set_fact
+# to ensure they are correctly scoped and available for subsequent tasks.
+# apache_user: "will_be_set_by_os_family"
+# apache_group: "will_be_set_by_os_family"
+# apache_package_name: "will_be_set_by_os_family"
+# php_package_names: "will_be_set_by_os_family"
+# mariadb_server_package_name: "will_be_set_by_os_family"
+# mariadb_client_package_name: "will_be_set_by_os_family"
+# apache_service_name: "will_be_set_by_os_family"
+# apache_conf_dir_debian: "/etc/apache2"
+# apache_conf_dir_redhat: "/etc/httpd"
+# apache_wordpress_conf_path_debian: "{{ apache_conf_dir_debian }}/sites-available/wordpress.conf"
+# apache_wordpress_conf_path_redhat: "{{ apache_conf_dir_redhat }}/conf.d/wordpress.conf"
+# apache_vhost_enable_cmd_debian: "a2ensite wordpress.conf"
+# apache_mod_rewrite_enable_cmd_debian: "a2enmod rewrite"
+
+# Placeholder for python interpreter for mysql modules if needed
+# mysql_python_interpreter: "default" # or specific path like /usr/bin/python3
+# mysql_binding_package_debian: "python3-pymysql" # if using pymysql
+# mysql_binding_package_redhat: "python3-PyMySQL" # if using pymysql
+python_mysql_dependency: "{{ 'python3-pymysql' if ansible_os_family == 'Debian' else 'python3-PyMySQL' }}"

@@ -1,0 +1,184 @@
+---
+# tasks/install_wordpress.yml
+
+- name: Check if WordPress is already installed
+  ansible.builtin.stat:
+    path: "{{ wp_install_path }}/wp-settings.php" # A core WordPress file
+  register: wordpress_installed_check
+  tags:
+    - wordpress
+    - wordpress_install
+
+- name: Debug WordPress installation status
+  ansible.builtin.debug:
+    var: wordpress_installed_check.stat.exists
+  tags:
+    - wordpress
+    - wordpress_install
+    - debug
+
+# Block for downloading and extracting WordPress, only if not already installed
+- name: Download and Extract WordPress
+  when: not wordpress_installed_check.stat.exists
+  block:
+    - name: Download WordPress archive
+      ansible.builtin.get_url:
+        url: "https://wordpress.org/{{ wp_version }}.zip" # e.g., latest.zip or wordpress-5.8.zip
+        dest: "{{ wp_archive_path }}" # e.g., /tmp/wordpress-latest.zip
+        mode: '0644'
+      register: download_result
+      until: download_result is succeeded # Retry mechanism for downloads
+      retries: 3
+      delay: 5
+      tags:
+        - wordpress
+        - wordpress_install
+
+    - name: Ensure target installation directory exists
+      ansible.builtin.file:
+        path: "{{ wp_install_path }}"
+        state: directory
+        owner: "{{ apache_user }}" # Set owner early
+        group: "{{ apache_group }}" # Set group early
+        mode: '0755'
+      become: yes
+      tags:
+        - wordpress
+        - wordpress_install
+
+    - name: Extract WordPress archive
+      ansible.builtin.unarchive:
+        src: "{{ wp_archive_path }}"
+        dest: "{{ wp_tmp_download_dir }}" # Extract to /tmp first
+        remote_src: yes # Indicates that src is on the remote machine
+        creates: "{{ wp_extracted_path }}/index.php" # Avoid re-extracting if /tmp/wordpress/index.php exists
+      become: yes # May need sudo if /tmp is restrictive or for specific unarchive options
+      tags:
+        - wordpress
+        - wordpress_install
+      when: download_result is succeeded # Only if download was successful
+
+    # The original script uses `cp -r wordpress/* /var/www/html/`.
+    # This means the *contents* of the /tmp/wordpress directory are copied.
+    # Using synchronize is a good way to do this.
+    # Ensure wp_extracted_path points to the 'wordpress' folder created by unarchive.
+    - name: Copy WordPress files to install path
+      ansible.posix.synchronize:
+        src: "{{ wp_extracted_path }}/" # Trailing slash is important for rsync-like behavior
+        dest: "{{ wp_install_path }}"
+        delete: no # Do not delete files in dest that are not in src
+        recursive: yes
+        perms: yes # Preserve permissions from source if sensible
+        # archive: yes # Includes recursive, links, perms, times, group, owner, devices, specials
+        # checksum: yes # Use checksum, not mod-time & size
+      become: yes # If target directory requires root
+      # delegate_to: localhost # If files are local and pushed, but here they are remote to remote
+      tags:
+        - wordpress
+        - wordpress_install
+      when: download_result is succeeded
+
+    - name: Clean up downloaded WordPress archive
+      ansible.builtin.file:
+        path: "{{ wp_archive_path }}"
+        state: absent
+      tags:
+        - wordpress
+        - wordpress_install
+        - cleanup
+      when: download_result is succeeded
+
+    - name: Clean up extracted WordPress directory in tmp
+      ansible.builtin.file:
+        path: "{{ wp_extracted_path }}" # /tmp/wordpress
+        state: absent
+      tags:
+        - wordpress
+        - wordpress_install
+        - cleanup
+      when: download_result is succeeded
+
+  tags:
+    - wordpress
+    - wordpress_install
+
+# Set permissions regardless of whether it was a fresh install or not,
+# as permissions might have been altered.
+- name: Set ownership for WordPress installation directory
+  ansible.builtin.file:
+    path: "{{ wp_install_path }}"
+    state: directory
+    owner: "{{ apache_user }}" # Variable from os_vars
+    group: "{{ apache_group }}" # Variable from os_vars
+    recurse: yes
+  become: yes
+  tags:
+    - wordpress
+    - wordpress_install
+
+# More granular permissions as per WordPress hardening guides (example)
+# This is a basic setup from the script: chown -R www-data:www-data /var/www/html, chmod -R 755 /var/www/html
+# WordPress hardening recommends more specific permissions.
+# For now, sticking to the script's equivalent.
+- name: Set file permissions for WordPress installation (script equivalent)
+  ansible.builtin.command:
+    cmd: "chmod -R 755 {{ wp_install_path }}"
+  become: yes
+  changed_when: true # Assume it always changes for simplicity, or use file module with recurse
+  tags:
+    - wordpress
+    - wordpress_install
+  # A better way using file module:
+  # - name: Set directory permissions for WordPress
+  #   ansible.builtin.file:
+  #     path: "{{ wp_install_path }}"
+  #     state: directory
+  #     owner: "{{ apache_user }}"
+  #     group: "{{ apache_group }}"
+  #     mode: "0755" # Directories readable and executable
+  #     recurse: yes
+  #   become: yes
+  #
+  # - name: Set file permissions for WordPress
+  #   ansible.builtin.file:
+  #     path: "{{ item }}"
+  #     owner: "{{ apache_user }}"
+  #     group: "{{ apache_group }}"
+  #     mode: "0644" # Files readable
+  #   with_fileglob:
+  #     - "{{ wp_install_path }}/*.*" # This is not recursive, need find
+  #   become: yes
+  # Using find and file for more precise recursive permissions:
+- name: Recursively set directory permissions
+  ansible.builtin.command: "find {{ wp_install_path }} -type d -exec chmod 755 {} \\;"
+  become: yes
+  changed_when: false # Hard to determine change accurately with exec
+  tags:
+    - wordpress
+    - wordpress_install
+
+- name: Recursively set file permissions
+  ansible.builtin.command: "find {{ wp_install_path }} -type f -exec chmod 644 {} \\;"
+  become: yes
+  changed_when: false # Hard to determine change accurately with exec
+  tags:
+    - wordpress
+    - wordpress_install
+
+- name: Ensure wp-config.php path exists for later tasks (if WP was just installed)
+  ansible.builtin.stat:
+    path: "{{ wp_install_path }}/wp-config-sample.php"
+  register: wp_config_sample_check
+  tags:
+    - wordpress
+    - wordpress_install
+    - wordpress_config
+
+- name: Debug wp-config-sample.php status
+  ansible.builtin.debug:
+    var: wp_config_sample_check.stat.exists
+  tags:
+    - wordpress
+    - wordpress_install
+    - wordpress_config
+    - debug

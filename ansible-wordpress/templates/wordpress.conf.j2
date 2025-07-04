@@ -1,0 +1,48 @@
+<VirtualHost *:{{ apache_port }}>
+    ServerAdmin {{ apache_server_admin }}
+    DocumentRoot {{ apache_doc_root }}
+
+    <Directory {{ apache_doc_root }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog {{ apache_log_dir }}/error.log
+    CustomLog {{ apache_log_dir }}/access.log combined
+</VirtualHost>
+
+# Note: The original script had DocumentRoot /var/www/html/wordpress
+# and <Directory /var/www/html/wordpress>.
+# The variable `apache_doc_root` (defaulting to `wp_install_path` which is /var/www/html)
+# implies WordPress files are directly in /var/www/html.
+# If WordPress is installed in a subdirectory (e.g., /var/www/html/wordpress),
+# then `apache_doc_root` should be set to that subdirectory path for this config to match.
+# The current setup assumes WordPress is at the root of `wp_install_path`.
+# For example, if you want wordpress at /var/www/html/wp, then:
+# wp_install_path: "/var/www/html/wp"
+# apache_doc_root: "{{ wp_install_path }}"
+# This means the files from the 'wordpress' directory (after unzipping) are copied into /var/www/html/wp.
+
+# If `wp_install_path` is `/var/www/html` and the script's `cp -r wordpress/* /var/www/html/`
+# is replicated, then WordPress files are indeed at `/var/www/html`.
+# The original script's Apache conf points to `/var/www/html/wordpress`, which suggests
+# that the `wordpress` directory itself should be the document root, or files were moved into such a dir.
+# Let's assume `apache_doc_root` correctly points to where WordPress core files (index.php etc.) are located.
+# If WordPress files are in `/var/www/html/`, then `apache_doc_root` should be `/var/www/html/`.
+# If they are in `/var/www/html/wordpress/`, then `apache_doc_root` should be `/var/www/html/wordpress/`.
+# The `wp_install_path` variable is where the `wordpress` directory from the zip is effectively copied to.
+# The default `apache_doc_root: "{{ wp_install_path }}"` should be correct if WordPress files are directly in that path.
+
+# The original shell script's `cp -r wordpress/* /var/www/html/` copies the *contents* of the extracted `wordpress` folder
+# into `/var/www/html/`. So, `index.php` would be at `/var/www/html/index.php`.
+# The Apache config in the script then sets `DocumentRoot /var/www/html/wordpress`. This is a mismatch.
+# The DocumentRoot should be `/var/www/html` based on that copy command.
+# I will keep `apache_doc_root` as the variable, assuming the user sets it correctly to where WP's index.php is.
+# The default is `wp_install_path` which is `/var/www/html`. This seems correct.
+# The script's Apache conf has `/var/www/html/wordpress`. This needs clarification or fixing.
+# For now, the template uses `{{ apache_doc_root }}`, which defaults to `{{ wp_install_path }}` (`/var/www/html`).
+# This means the user should ensure their WordPress files are directly under `wp_install_path`.
+# If they want it in a subdirectory like 'wordpress', they should set `wp_install_path` to `/var/www/html/wordpress`
+# and ensure files are copied there. Or, set `apache_doc_root` to `/var/www/html/wordpress` and `wp_install_path` to `/var/www/html`.
+# The current role structure assumes `wp_install_path` is the final web root for WordPress.

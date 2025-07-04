@@ -1,0 +1,146 @@
+---
+# tasks/configure_mariadb.yml
+
+- name: Ensure MariaDB service is started and enabled
+  ansible.builtin.service:
+    name: "{{ mariadb_service_name }}"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - database
+    - wordpress_install
+
+# The original script has a `sleep 10` after starting MariaDB.
+# Ansible modules for MySQL/MariaDB generally handle waiting for the server to be ready.
+# If issues arise, a specific wait task can be added:
+# - name: Wait for MariaDB to be fully available
+#   ansible.builtin.wait_for:
+#     host: "{{ wp_db_host }}" # Usually localhost
+#     port: 3306 # Default MySQL/MariaDB port
+#     delay: 5   # Initial delay before first check
+#     timeout: 60 # Total time to wait
+#   tags:
+#     - database
+#     - wordpress_install
+
+# Note on mysql_user password changes:
+# The mysql_user module is generally idempotent. If the user exists with the specified password,
+# it won't make changes. However, changing the root password requires care.
+# The `check_implicit_admin` parameter can be useful.
+# Using `host_all_compatible: yes` for root user changes if access from multiple hosts is needed.
+
+- name: Set MariaDB root password
+  community.mysql.mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock # Common socket path, adjust if different
+    # login_user: root # Not needed when using socket for initial root setup without password
+    # login_password: "" # Initial empty password assumed for root
+    name: root
+    host: localhost
+    password: "{{ wp_db_root_password }}"
+    priv: "*.*:ALL,GRANT" # Grant all privileges with grant option
+    state: present
+    # check_implicit_admin: yes # Ensures the user can still administer after password change
+  become: yes
+  # This task might fail if root already has a password set by other means.
+  # It's best run on a fresh MariaDB install.
+  # For existing installs, this might need to be conditional or adjusted.
+  # The original script runs `ALTER USER`, which assumes root can connect without a password initially.
+  tags:
+    - database
+    - mariadb_secure
+    - wordpress_install
+
+- name: Remove anonymous MariaDB users
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    name: "" # Anonymous user
+    host_all: yes # Remove for all hosts (''@'localhost', ''@'%', etc.)
+    state: absent
+  become: yes
+  tags:
+    - database
+    - mariadb_secure
+    - wordpress_install
+
+- name: Remove MariaDB test database
+  community.mysql.mysql_db:
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    name: test
+    state: absent
+  become: yes
+  tags:
+    - database
+    - mariadb_secure
+    - wordpress_install
+
+# The script also does: DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+# This is usually covered by `DROP DATABASE test;` and flushing privileges.
+# `mysql_db` module should handle this cleanly.
+
+- name: Flush MariaDB privileges after security changes
+  community.mysql.mysql_query:
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    query: FLUSH PRIVILEGES;
+  become: yes
+  changed_when: false # FLUSH PRIVILEGES doesn't report change in a way Ansible easily tracks
+  tags:
+    - database
+    - mariadb_secure
+    - wordpress_install
+
+- name: Create WordPress database
+  community.mysql.mysql_db:
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    name: "{{ wp_db_name }}"
+    state: present
+    collation: "utf8mb4_general_ci" # Good default for WordPress
+    encoding: "utf8mb4"
+  become: yes
+  tags:
+    - database
+    - wordpress_install
+
+- name: Create WordPress database user
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    name: "{{ wp_db_user }}"
+    password: "{{ wp_db_password }}"
+    host: "{{ wp_db_host }}" # Typically localhost
+    priv: "{{ wp_db_name }}.*:ALL" # Grant all privileges on the WordPress database
+    state: present
+    # append_privs: no # Default is no, replaces privileges
+  become: yes
+  tags:
+    - database
+    - wordpress_install
+
+# The script runs FLUSH PRIVILEGES again after creating the user.
+# The mysql_user module usually handles privilege updates effectively,
+# but an explicit flush can be added if necessary.
+- name: Flush MariaDB privileges after creating WP user
+  community.mysql.mysql_query:
+    login_user: root
+    login_password: "{{ wp_db_root_password }}"
+    query: FLUSH PRIVILEGES;
+  become: yes
+  changed_when: false
+  tags:
+    - database
+    - wordpress_install
+
+# Ensure MariaDB is running after all configuration
+- name: Ensure MariaDB is running and enabled (post-configuration)
+  ansible.builtin.service:
+    name: "{{ mariadb_service_name }}"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - database
+    - wordpress_install

@@ -1,0 +1,80 @@
+---
+# tasks file for ansible-wordpress role
+
+- name: Load OS-specific variables
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "os_vars_{{ ansible_os_family | lower }}.yml"
+    - "os_vars_default.yml" # A fallback if specific OS family vars are not defined
+  tags: always
+
+- name: Update package cache (apt)
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600 # Update if cache is older than 1 hour
+  when: ansible_os_family == "Debian"
+  become: yes
+  tags:
+    - packages
+    - wordpress_install
+
+- name: Update package cache (yum/dnf)
+  ansible.builtin.package:
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+  become: yes
+  tags:
+    - packages
+    - wordpress_install
+
+# This task will include other task files for better organization
+- name: Include package installation tasks
+  ansible.builtin.include_tasks: install_packages.yml
+  tags:
+    - packages
+    - wordpress_install
+
+- name: Include MariaDB configuration tasks
+  ansible.builtin.include_tasks: configure_mariadb.yml
+  tags:
+    - database
+    - wordpress_install
+
+- name: Include Apache configuration tasks
+  ansible.builtin.include_tasks: configure_apache.yml
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Include WordPress installation tasks
+  ansible.builtin.include_tasks: install_wordpress.yml
+  tags:
+    - wordpress
+    - wordpress_install
+
+- name: Include WordPress configuration (wp-config.php) tasks
+  ansible.builtin.include_tasks: configure_wordpress.yml
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+
+- name: Ensure Apache is started and enabled
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Ensure MariaDB is started and enabled
+  ansible.builtin.service:
+    name: "{{ mariadb_service_name }}"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - database
+    - wordpress_install

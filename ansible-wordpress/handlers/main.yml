@@ -1,0 +1,38 @@
+---
+# handlers file for ansible-wordpress role
+
+- name: Restart Apache
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}" # Defined in os_vars_*.yml
+    state: restarted
+  become: yes
+  listen: "Restart Apache" # Custom listener name
+
+- name: Reload Apache
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}" # Defined in os_vars_*.yml
+    state: reloaded
+  become: yes
+  listen: "Reload Apache" # Custom listener name
+
+- name: Restart MariaDB
+  ansible.builtin.service:
+    name: "{{ mariadb_service_name }}" # This is 'mariadb' for both OS families
+    state: restarted
+  become: yes
+  listen: "Restart MariaDB" # Custom listener name
+
+# Example of a more specific PHP-FPM handler if it were used:
+# - name: Restart PHP-FPM
+#   ansible.builtin.service:
+#     name: "{{ php_fpm_service_name }}" # e.g., php7.4-fpm or php-fpm
+#     state: restarted
+#   become: yes
+#   when: php_fpm_service_name is defined and php_fpm_service_name != ""
+#   listen: "Restart PHP-FPM"
+
+# Handlers are only triggered once, even if notified multiple times during a play.
+# They are also triggered only at the end of each play, or when explicitly flushed
+# using `meta: flush_handlers`.
+# The listener names used here ("Restart Apache", "Reload Apache", "Restart MariaDB")
+# must match the `notify` statements in the tasks.

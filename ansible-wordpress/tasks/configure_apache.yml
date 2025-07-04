@@ -1,0 +1,112 @@
+---
+# tasks/configure_apache.yml
+
+- name: Ensure Apache service is started and enabled (pre-configuration)
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Remove default Apache page (Debian/Ubuntu)
+  ansible.builtin.file:
+    path: "{{ apache_default_index_file }}" # Defined in os_vars_*.yml
+    state: absent
+  when: ansible_os_family == 'Debian' and apache_default_index_file is defined and apache_default_index_file != ""
+  become: yes
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Remove default Apache page (RedHat/Rocky - example, adjust if needed)
+  ansible.builtin.file:
+    path: "/etc/httpd/conf.d/welcome.conf" # Common RHEL/CentOS/Rocky default welcome page config
+    state: absent
+  when: ansible_os_family == 'RedHat'
+  become: yes
+  notify: Reload Apache
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Remove default Apache index page for RedHat if it exists (another common path)
+  ansible.builtin.file:
+    path: "{{ apache_default_index_file }}" # Defined in os_vars_*.yml
+    state: absent
+  when: ansible_os_family == 'RedHat' and apache_default_index_file is defined and apache_default_index_file != ""
+  become: yes
+  tags:
+    - webserver
+    - wordpress_install
+
+
+- name: Template WordPress Apache configuration
+  ansible.builtin.template:
+    src: wordpress.conf.j2 # Will be created in templates/ directory
+    dest: "{{ apache_wordpress_conf_path }}" # Variable from os_vars_*.yml
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: Reload Apache
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Enable WordPress site (Debian/Ubuntu)
+  ansible.builtin.command:
+    cmd: "{{ apache_enable_site_command }}" # e.g., a2ensite wordpress.conf
+  args:
+    creates: "{{ apache_sites_enabled_dir }}/{{ apache_wordpress_conf_filename }}" # Check if symlink/file exists
+  when: ansible_os_family == 'Debian'
+  become: yes
+  notify: Reload Apache
+  tags:
+    - webserver
+    - wordpress_install
+
+# For RedHat/Rocky, placing the file in conf.d usually enables it automatically.
+# If a specific command is needed for a particular RedHat-based setup, it would go here.
+
+- name: Enable Apache rewrite module (Debian/Ubuntu)
+  ansible.builtin.command:
+    cmd: "{{ apache_enable_mod_command }} rewrite" # e.g., a2enmod rewrite
+  args:
+    creates: "{{ apache_mods_available_dir | default('') }}/rewrite.load" # Check if module symlink exists or similar check
+  when: ansible_os_family == 'Debian'
+  become: yes
+  notify: Restart Apache # Some module changes require a full restart
+  tags:
+    - webserver
+    - wordpress_install
+
+- name: Ensure Apache rewrite module is enabled (RedHat/Rocky)
+  ansible.builtin.lineinfile:
+    path: "{{ apache_conf_dir }}/conf.modules.d/00-base.conf" # Common path, might vary
+    regexp: '^#?(LoadModule\s+rewrite_module\s+modules/mod_rewrite.so)'
+    line: 'LoadModule rewrite_module modules/mod_rewrite.so'
+    backrefs: yes
+  when: ansible_os_family == 'RedHat'
+  become: yes
+  notify: Restart Apache # Module changes often require restart
+  tags:
+    - webserver
+    - wordpress_install
+  # Check if mod_rewrite.so exists first
+  # Stat path: /usr/lib64/httpd/modules/mod_rewrite.so or similar
+  # This task assumes mod_rewrite.so is available and just needs to be uncommented/added.
+  # A more robust check would verify the module file's existence.
+
+# Final check to ensure service is running after configuration changes
+- name: Ensure Apache is running and enabled
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - webserver
+    - wordpress_install

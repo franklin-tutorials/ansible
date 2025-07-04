@@ -1,0 +1,94 @@
+---
+# tasks/configure_wordpress.yml - Manages wp-config.php
+
+- name: Check if wp-config.php already exists
+  ansible.builtin.stat:
+    path: "{{ wp_install_path }}/wp-config.php"
+  register: wp_config_exists_check
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+
+# Task to fetch salts from WordPress API.
+# This will run only if wp-config.php doesn't exist OR if default salts are still present (more complex check).
+# For simplicity, we fetch if any of the default salt values are detected or if the file doesn't exist.
+# A more robust check would be to see if the salts in wp-config.php are the default placeholder ones.
+- name: Fetch WordPress salts from API
+  ansible.builtin.uri:
+    url: "https://api.wordpress.org/secret-key/1.1/salt/"
+    method: GET
+    return_content: yes
+  register: wordpress_salts_api_result
+  when: >
+    not wp_config_exists_check.stat.exists or
+    wp_auth_key == "put your unique phrase here" or
+    wp_secure_auth_key == "put your unique phrase here" or
+    wp_logged_in_key == "put your unique phrase here" or
+    wp_nonce_key == "put your unique phrase here" or
+    wp_auth_salt == "put your unique phrase here" or
+    wp_secure_auth_salt == "put your unique phrase here" or
+    wp_logged_in_salt == "put your unique phrase here" or
+    wp_nonce_salt == "put your unique phrase here"
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+
+- name: Debug WordPress salts API result
+  ansible.builtin.debug:
+    var: wordpress_salts_api_result.content
+  when: wordpress_salts_api_result.content is defined
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+    - debug
+
+# This task parses the salts fetched from the API.
+# The API returns lines like: define('AUTH_KEY', 'value');
+# We need to extract these values.
+- name: Set facts for WordPress salts from API
+  ansible.builtin.set_fact:
+    wp_auth_key_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'AUTH_KEY\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_auth_key) }}"
+    wp_secure_auth_key_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'SECURE_AUTH_KEY\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_secure_auth_key) }}"
+    wp_logged_in_key_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'LOGGED_IN_KEY\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_logged_in_key) }}"
+    wp_nonce_key_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'NONCE_KEY\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_nonce_key) }}"
+    wp_auth_salt_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'AUTH_SALT\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_auth_salt) }}"
+    wp_secure_auth_salt_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'SECURE_AUTH_SALT\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_secure_auth_salt) }}"
+    wp_logged_in_salt_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'LOGGED_IN_SALT\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_logged_in_salt) }}"
+    wp_nonce_salt_api: "{{ wordpress_salts_api_result.content | regex_search('define\\(\\'NONCE_SALT\\',\\s*\\'(.*)\\'\\);', '\\1') | first | default(wp_nonce_salt) }}"
+  when: wordpress_salts_api_result.content is defined and wordpress_salts_api_result.status == 200
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+
+- name: Template wp-config.php file
+  ansible.builtin.template:
+    src: wp-config.php.j2 # Will be created in templates/
+    dest: "{{ wp_install_path }}/wp-config.php"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: '0640' # Secure permissions for wp-config.php
+  become: yes
+  # If wp-config.php exists, this will overwrite it.
+  # This is generally okay if the template is the source of truth.
+  # Add 'backup: yes' if you want to keep a backup of the old file.
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+
+# Ensure the sample file is removed if wp-config.php is successfully created.
+- name: Remove wp-config-sample.php
+  ansible.builtin.file:
+    path: "{{ wp_install_path }}/wp-config-sample.php"
+    state: absent
+  when: wp_config_exists_check.stat.exists # Or check based on successful templating
+  become: yes
+  tags:
+    - wordpress
+    - wordpress_config
+    - wordpress_install
+    - cleanup

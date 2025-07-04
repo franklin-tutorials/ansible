@@ -1,0 +1,64 @@
+---
+- name: Deploy WordPress using the ansible-wordpress role
+  hosts: all # Or specify your target group, e.g., webservers
+  become: yes # Most tasks in the role require sudo
+
+  # Gather facts, as some role variables and conditionals depend on them (e.g., ansible_os_family)
+  gather_facts: yes
+
+  # Define roles path if your role is in a subdirectory or a standard roles path
+  # roles_path:
+  #   - ./roles # Assuming your 'ansible-wordpress' role is in a 'roles' subdirectory relative to this playbook
+  #   - /etc/ansible/roles # Standard system-wide roles path
+  # If the 'ansible-wordpress' role directory is at the same level as this playbook,
+  # Ansible should find it automatically if you are in the parent directory of both.
+  # Or, if this playbook.yml is in the root, and ansible-wordpress is a subdir,
+  # then you might call the role as 'ansible-wordpress' directly.
+
+  roles:
+    - role: ansible-wordpress # This assumes the 'ansible-wordpress' directory is in a recognized roles path.
+                              # If playbook.yml is in the repo root, and 'ansible-wordpress' is a folder in the root,
+                              # this should work if you run ansible-playbook from the repo root.
+
+  vars:
+    # --- REQUIRED: CHANGE THESE FOR PRODUCTION ---
+    wp_db_password: "AVerySecurePassword123!"       # Password for the WordPress database user
+    wp_db_root_password: "SuperSecureRootDBPass789$" # Desired MariaDB root password
+
+    # --- Optional: Override other defaults from defaults/main.yml as needed ---
+    # wp_version: "6.0.3" # Specific WordPress version
+    # wp_db_name: "my_wp_site_db"
+    # wp_db_user: "my_wp_user"
+    # wp_install_path: "/var/www/my_custom_wordpress_site"
+    # apache_server_admin: "webmaster@mydomain.com"
+
+    # --- WordPress Salts: Highly Recommended to set these if not relying on API fetch ---
+    # If you want to ensure specific salts are used, or if API access is an issue:
+    # wp_auth_key: "generatE_a_uniQue_phrase_here_for_auth_key"
+    # wp_secure_auth_key: "generatE_a_uniQue_phrase_here_for_secure_auth_key"
+    # wp_logged_in_key: "generatE_a_uniQue_phrase_here_for_logged_in_key"
+    # wp_nonce_key: "generatE_a_uniQue_phrase_here_for_nonce_key"
+    # wp_auth_salt: "generatE_a_uniQue_phrase_here_for_auth_salt"
+    # wp_secure_auth_salt: "generatE_a_uniQue_phrase_here_for_secure_auth_salt"
+    # wp_logged_in_salt: "generatE_a_uniQue_phrase_here_for_logged_in_salt"
+    # wp_nonce_salt: "generatE_a_uniQue_phrase_here_for_nonce_salt"
+
+  # Example of how to run this playbook:
+  # 1. Ensure you have an inventory file (e.g., inventory.ini)
+  #    [webservers]
+  #    your_server_ip_or_hostname ansible_user=your_ssh_user
+  #
+  # 2. Run the playbook:
+  #    ansible-playbook -i inventory.ini playbook.yml
+  #
+  #    If you want to provide passwords at runtime (more secure):
+  #    ansible-playbook -i inventory.ini playbook.yml --ask-become-pass -e "wp_db_password='passed_in_pw'" -e "wp_db_root_password='passed_in_root_pw'"
+  #    (Note: -e for complex passwords might need careful quoting)
+  #    Or use Ansible Vault for sensitive variables.
+
+# You might also have a site.yml that includes this playbook or uses the role directly.
+# For testing, this simple playbook is usually sufficient.
+# For a more formal role structure, this playbook might be located in `tests/test.yml`
+# and an `inventory` file would be in `tests/inventory`.
+# The `ansible-wordpress` directory created is the role itself.
+# This `playbook.yml` is a way to consume/use that role.

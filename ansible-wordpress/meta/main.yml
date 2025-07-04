@@ -1,0 +1,53 @@
+galaxy_info:
+  author: "Your Name / AI Assisted"
+  description: "Installs WordPress with Apache and MariaDB on Debian/Ubuntu and RedHat/Rocky Linux."
+  company: "Your Company (if applicable)"
+
+  # If an official Ansible Galaxy page for the role exists, add it here
+  # issue_tracker_url: http://example.com/issue/tracker
+
+  license: "MIT" # Or your chosen license, e.g., GPL-2.0-or-later, Apache-2.0
+
+  min_ansible_version: "2.9" # Based on modules used (e.g., community.mysql, synchronize)
+
+  # Platforms is a list of versions. Specify a specific version or use 'all'
+  # if you don't want to specify specific versions.
+  # For example, for Debian, you might support bullseye, buster, etc.
+  # For RHEL/Rocky, you might support 8, 9.
+  platforms:
+    - name: EL # Enterprise Linux (Covers RHEL, CentOS, Rocky, AlmaLinux etc.)
+      versions:
+        - "8"
+        - "9"
+    - name: Debian
+      versions:
+        - bullseye # Debian 11
+        - buster   # Debian 10
+    - name: Ubuntu
+      versions:
+        - jammy  # 22.04
+        - focal  # 20.04
+        # - bionic # 18.04 (might need older package versions for some things)
+
+  galaxy_tags:
+    - wordpress
+    - web
+    - apache
+    - httpd
+    - mariadb
+    - mysql
+    - blog
+    - cms
+    - deployment
+    - lamp
+
+dependencies: []
+# List your role dependencies here, if any. For example:
+#
+# dependencies:
+#   - { role: geerlingguy.apache }
+#   - { role: geerlingguy.mysql }
+#
+# This role is currently self-contained for Apache and MariaDB installation.
+# If you were to refactor it to use external roles for those components,
+# you would list them here.

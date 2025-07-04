@@ -1,0 +1,67 @@
+---
+# tasks/install_packages.yml
+
+- name: Install common prerequisite packages
+  ansible.builtin.package:
+    name:
+      - wget
+      - unzip
+      # Add other common packages if identified as necessary, e.g., tar, curl
+    state: present
+  become: yes
+  tags:
+    - packages
+    - wordpress_install
+
+- name: Install Apache web server
+  ansible.builtin.package:
+    name: "{{ apache_package_name }}" # Variable set in os_vars_*.yml
+    state: present
+  become: yes
+  notify: Restart Apache # Handler to restart apache
+  tags:
+    - packages
+    - webserver
+    - wordpress_install
+
+- name: Install PHP and MySQL extension for PHP
+  ansible.builtin.package:
+    name: "{{ php_package_names }}" # Variable set in os_vars_*.yml (list of packages)
+    state: present
+  become: yes
+  notify: Restart Apache # PHP changes often require Apache restart
+  tags:
+    - packages
+    - php
+    - wordpress_install
+
+- name: Install MariaDB server
+  ansible.builtin.package:
+    name: "{{ mariadb_server_package_name }}" # Variable set in os_vars_*.yml
+    state: present
+  become: yes
+  notify: Restart MariaDB # Handler to restart mariadb
+  tags:
+    - packages
+    - database
+    - wordpress_install
+
+- name: Install MariaDB client (if different from server package or for specific tools)
+  ansible.builtin.package:
+    name: "{{ mariadb_client_package_name }}" # Variable set in os_vars_*.yml
+    state: present
+  become: yes
+  tags:
+    - packages
+    - database
+    - wordpress_install
+
+# The python MySQL dependency (pymysql/PyMySQL) is installed within os_vars_debian.yml and os_vars_redhat.yml
+# as it's closely tied to the OS and its python environment.
+# No need to repeat it here unless we want a more generic approach, but it's already handled.
+
+# Note on DEBIAN_FRONTEND=noninteractive:
+# The ansible.builtin.apt module handles non-interactive installations by default
+# for Debian/Ubuntu, so explicitly setting DEBIAN_FRONTEND is usually not required
+# when using Ansible's package modules.
+# For yum/dnf, similar non-interactive behavior is standard.

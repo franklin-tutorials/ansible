@@ -1,0 +1,63 @@
+---
+# tasks/os_vars_debian.yml - Sets variables for Debian/Ubuntu family
+
+- name: Set OS-specific variables for Debian family
+  ansible.builtin.set_fact:
+    apache_user: "www-data"
+    apache_group: "www-data"
+    apache_package_name: "{{ apache_package_name_debian }}"
+    php_package_names: "{{ php_package_names_debian }}"
+    mariadb_server_package_name: "{{ mariadb_server_package_name_debian }}"
+    mariadb_client_package_name: "{{ mariadb_client_package_name_debian }}"
+    apache_service_name: "{{ apache_service_name_debian }}"
+    apache_conf_dir: "/etc/apache2"
+    apache_sites_available_dir: "/etc/apache2/sites-available"
+    apache_sites_enabled_dir: "/etc/apache2/sites-enabled"
+    apache_wordpress_conf_filename: "wordpress.conf"
+    apache_wordpress_conf_path: "{{ apache_sites_available_dir }}/{{ apache_wordpress_conf_filename }}"
+    apache_mods_available_dir: "/etc/apache2/mods-available"
+    apache_log_dir: "/var/log/apache2"
+    # Commands for enabling sites/modules
+    apache_enable_site_command: "a2ensite {{ apache_wordpress_conf_filename }}"
+    apache_disable_site_command: "a2dissite {{ apache_wordpress_conf_filename }}"
+    apache_enable_mod_command: "a2enmod" # Module name will be appended
+    php_conf_paths: # Common paths for php.ini, might vary by PHP version
+      - "/etc/php/{{ php_version_debian | default('7.4') }}/apache2/php.ini" # Defaulting to 7.4, adjust if needed or detect version
+      - "/etc/php/{{ php_version_debian | default('8.0') }}/apache2/php.ini"
+      - "/etc/php/{{ php_version_debian | default('8.1') }}/apache2/php.ini"
+      - "/etc/php/{{ php_version_debian | default('8.2') }}/apache2/php.ini"
+    mysql_python_interpreter: "/usr/bin/python3" # Usually the case for modern Debian/Ubuntu
+    # python_mysql_dependency defined in defaults/vars, but could be overridden here if needed
+    # Default index file to remove
+    apache_default_index_file: "/var/www/html/index.html"
+  tags: always
+
+# Note: php_version_debian is not defined yet.
+# It might be better to use a more dynamic way to find php.ini if versions vary widely,
+# or require the user to specify their PHP version if it's not standard.
+# For now, we list common paths. The lineinfile/template tasks will try them.
+
+# Example of how to potentially get PHP version (might be too complex for here)
+# - name: Get PHP version (Debian)
+#   shell: "php -r 'echo PHP_MAJOR_VERSION.\" .\".PHP_MINOR_VERSION;'"
+#   register: php_version_result
+#   changed_when: false
+#   check_mode: no
+#   when: ansible_os_family == 'Debian'
+# - name: Set PHP version fact (Debian)
+#   set_fact:
+#     php_version_debian_detected: "{{ php_version_result.stdout }}"
+#   when: ansible_os_family == 'Debian' and php_version_result.stdout is defined
+#   tags: always
+
+# This will be used by mysql_user and mysql_db modules
+- name: Ensure Python MySQL client (pymysql) is installed for Debian
+  ansible.builtin.apt:
+    name: "{{ python_mysql_dependency }}"
+    state: present
+  become: yes
+  when: ansible_os_family == 'Debian'
+  tags:
+    - packages
+    - database
+    - wordpress_install

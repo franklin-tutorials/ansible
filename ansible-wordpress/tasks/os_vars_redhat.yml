@@ -1,0 +1,43 @@
+---
+# tasks/os_vars_redhat.yml - Sets variables for RedHat/Rocky family
+
+- name: Set OS-specific variables for RedHat family
+  ansible.builtin.set_fact:
+    apache_user: "apache"
+    apache_group: "apache"
+    apache_package_name: "{{ apache_package_name_redhat }}"
+    php_package_names: "{{ php_package_names_redhat }}"
+    mariadb_server_package_name: "{{ mariadb_server_package_name_redhat }}"
+    mariadb_client_package_name: "{{ mariadb_client_package_name_redhat }}"
+    apache_service_name: "{{ apache_service_name_redhat }}"
+    apache_conf_dir: "/etc/httpd"
+    apache_sites_available_dir: "/etc/httpd/conf.d" # RedHat typically uses conf.d directly
+    apache_sites_enabled_dir: "/etc/httpd/conf.d"   # No separate sites-enabled by default
+    apache_wordpress_conf_filename: "wordpress.conf"
+    apache_wordpress_conf_path: "{{ apache_sites_enabled_dir }}/{{ apache_wordpress_conf_filename }}"
+    apache_mods_available_dir: "/etc/httpd/conf.modules.d" # Or /usr/lib64/httpd/modules/
+    apache_log_dir: "/var/log/httpd"
+    # Commands for enabling sites/modules (often not needed or different for RedHat)
+    # Enabling site is usually by placing .conf in conf.d
+    # Enabling module might be via config file edit or specific command if available
+    # apache_enable_site_command: "" # Not typically used like a2ensite
+    # apache_enable_mod_command: ""  # e.g. httpd -M to check, config edits to enable
+    php_conf_paths: # Common paths for php.ini on RedHat systems
+      - "/etc/php.ini"
+    mysql_python_interpreter: "/usr/bin/python3" # Usually the case for modern RedHat family
+    # python_mysql_dependency defined in defaults/vars, but could be overridden here if needed
+    # Default index file to remove (if it exists, path might vary)
+    apache_default_index_file: "/var/www/html/noindex.html" # Example, check actual default page
+  tags: always
+
+# This will be used by mysql_user and mysql_db modules
+- name: Ensure Python MySQL client (PyMySQL) is installed for RedHat
+  ansible.builtin.package: # Use 'package' module for dnf/yum
+    name: "{{ python_mysql_dependency }}"
+    state: present
+  become: yes
+  when: ansible_os_family == 'RedHat'
+  tags:
+    - packages
+    - database
+    - wordpress_install
