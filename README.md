@@ -1,4 +1,3 @@
-
 # 🚀 Débuter avec Ansible sous Docker
 
 Bienvenue dans ce **LAB** d’initiation à **Ansible** !  
@@ -9,15 +8,14 @@ Tu vas apprendre à **automatiser des tâches répétitives** sur des machines L
 ---
 
 ⚠️ **IMPORTANT** :  
-**LES IMAGES DOCKER DE CE LAB SONT RÉSERVÉES À DES FINS DE TEST ET D’APPRENTISSAGE UNIQUEMENT !**    ➡️ **NE PAS LES UTILISER DANS UN  ENVIRONNEMENT DE PRODUCTION.**
-
+**LES IMAGES DOCKER DE CE LAB SONT RÉSERVÉES À DES FINS DE TEST ET D’APPRENTISSAGE UNIQUEMENT !** ➡️ **NE PAS LES UTILISER DANS UN ENVIRONNEMENT DE PRODUCTION.**
 
 ---
-
 
 ## ⚙️ Et pourquoi Docker Compose ?
 
 Docker Compose est un outil qui permet de :
+
 - **définir plusieurs conteneurs dans un seul fichier (`docker-compose.yaml`)**
 - **les lancer tous en une seule commande**
 
@@ -33,21 +31,20 @@ Avant de commencer, selon ton OS installes sur ta machine :
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Git](https://git-scm.com/downloads)
 
-
 ---
 
 ## 📁 Structure du lab
 
 Le fichier `docker-compose.yaml` crée les conteneurs suivants :
 
-| Nom | Rôle | Port SSH | Image utilisée |
-|-----|------|----------|----------------|
-| `ansible` | Conteneur de contrôle Ansible | 2222 | [`ftutorials/ubuntu-ansible`](https://hub.docker.com/r/ftutorials/ubuntu-ansible/tags) |
-| `client1` | Conteneur cible Ubuntu | 2223 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
-| `client2` | Conteneur cible Ubuntu | 2224 | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags) |
-| `client3` | Conteneur cible Rocky Linux | 2225 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
-| `client4` | Conteneur cible Rocky Linux | 2226 | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags) |
-| `quiz-ansible` | Quiz | XXXX | [`ftutorials/quiz:ansible-1`](https://hub.docker.com/r/ftutorials/quiz/tags) |
+| Nom            | Rôle                          | Port SSH | Image utilisée                                                                         |
+| -------------- | ----------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `ansible`      | Conteneur de contrôle Ansible | 2222     | [`ftutorials/ubuntu-ansible`](https://hub.docker.com/r/ftutorials/ubuntu-ansible/tags) |
+| `client1`      | Conteneur cible Ubuntu        | 2223     | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags)         |
+| `client2`      | Conteneur cible Ubuntu        | 2224     | [`ftutorials/ubuntu-ssh`](https://hub.docker.com/r/ftutorials/ubuntu-ssh/tags)         |
+| `client3`      | Conteneur cible Rocky Linux   | 2225     | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags)           |
+| `client4`      | Conteneur cible Rocky Linux   | 2226     | [`ftutorials/rocky-ssh`](https://hub.docker.com/r/ftutorials/rocky-ssh/tags)           |
+| `quiz-ansible` | Quiz                          | XXXX     | [`ftutorials/quiz:ansible-1`](https://hub.docker.com/r/ftutorials/quiz/tags)           |
 
 ---
 
@@ -66,17 +63,17 @@ N'hésites pas à utiliser la méthode de ton choix.
 Se positionner à l'emplacement du fichier `docker-compose.yaml` et lancer :
 
 ```bash
-cd ansible 
+cd ansible
 ```
 
 ```bash
-docker compose up -d  
+docker compose up -d
 ```
 
 ### 3. Lister et voir l'état des conteneurs depuis ton terminal
 
 ```bash
-docker compose ps 
+docker compose ps
 ```
 
 ### 4. Tester la connexion SSH depuis ton terminal
@@ -88,10 +85,11 @@ ssh root@localhost -p 2224  # client2
 ssh root@localhost -p 2225  # client3
 ssh root@localhost -p 2226  # client4
 ```
+
 🔑 Mot de passe : P@ssw0rd
 
 ⚠️ **IMPORTANT** :  
-**LES IMAGES DOCKER DE CE LAB SONT RÉSERVÉES À DES FINS DE TEST ET D’APPRENTISSAGE UNIQUEMENT !**    ➡️ **NE PAS LES UTILISER DANS UN  ENVIRONNEMENT DE PRODUCTION.**
+**LES IMAGES DOCKER DE CE LAB SONT RÉSERVÉES À DES FINS DE TEST ET D’APPRENTISSAGE UNIQUEMENT !** ➡️ **NE PAS LES UTILISER DANS UN ENVIRONNEMENT DE PRODUCTION.**
 
 Le dossier `config` est partagé dans le conteneur ansible à l’emplacement : `/root/config`.
 
@@ -100,13 +98,13 @@ C’est dans ce dossier en local sur ta machine que tu écriras ton inventaire, 
 ### 5. Arrêter les conteneurs depuis ton terminal
 
 ```bash
-docker compose stop 
+docker compose stop
 ```
 
 ### 6. Arrêter et supprimer les conteneurs depuis ton terminal
 
 ```bash
-docker compose down 
+docker compose down
 ```
 
 ### BONUS. Utilisation de Makefile
@@ -116,12 +114,13 @@ docker compose down
 Les commandes disponibles :
 
 ```bash
-make start     # Lancerenvironnement de travail
-make stop      # Arreterenvironnement de travail
-make restart   # Redemarrerenvironnement de travail
-make logs      # Voir les logsenvironnement de travail
-make list      # Voir les conteneursactifs environnement de travail
+make start     # Lancer l'environnement
+make stop      # Arreter l'environnement
+make restart   # Redemarrer l'environnement
+make logs      # Voir les logs de l'environnement
+make list      # Voir les conteneurs actifs de l'environnement
 ```
+
 ⚠️ L'outil `GNU make` doit être installé sur votre machine.
 
 ---
@@ -131,15 +130,4 @@ make list      # Voir les conteneursactifs environnement de travail
 - [Documentation Docker](https://www.docker.com/)
 - [Documentation Ansible](https://docs.ansible.com/)
 
-
 ---
-
-
-
-
-
-
-
-
-
-

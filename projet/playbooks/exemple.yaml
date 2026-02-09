@@ -1,8 +1,7 @@
 ---
-
 - name: Mon premier playbook
   hosts: all
 
-  tasks: 
-  - name: Tester la connectivité
-    ping:
+  tasks:
+    - name: Tester la connectivité
+      ping:
